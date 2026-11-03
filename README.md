@@ -19,39 +19,39 @@ Facilitar un intercambio inicial de preguntas clínicas y respuestas confirmadas
 
 ## Solución propuesta
 
-Una aplicación web responsive con dos vistas sincronizadas. El profesional podrá seleccionar preguntas clínicas predefinidas o escribir preguntas y revisar las respuestas confirmadas. El paciente podrá consultar videos en LSP del catálogo validado, responder frente a una cámara y confirmar o corregir el resultado reconocido.
+Una sola aplicación web responsive con dos modos que se alternan en el mismo dispositivo y comparten una consulta en memoria. La búsqueda del profesional se limita a preguntas y alias registrados. El paciente podrá consultar videos validados del catálogo y responder con alternativas visuales o, experimentalmente, cámara.
 
 Las preguntas escritas fuera del catálogo requerirán un mecanismo accesible acordado y validado con usuarios; no se propone convertir automáticamente cualquier texto en LSP. Los videos y el vocabulario deberán validarse con personas sordas usuarias de LSP y especialistas.
 
 ## Funcionalidades previstas del MVP
 
-Todas las funcionalidades siguientes están **propuestas y pendientes de implementación**:
+La base implementada incluye navegación, creación de consulta de demostración y búsqueda del catálogo. Las siguientes funcionalidades clínicas quedan **pendientes de implementación**:
 
 - Vista del profesional con catálogo de preguntas y envío al paciente.
 - Vista del paciente con videos en LSP asociados a preguntas del catálogo.
-- Sincronización de preguntas, respuestas y estados de confirmación.
+- Selección de pregunta y flujo de respuesta entre los modos del mismo dispositivo.
 - Captura de cámara con consentimiento y reconocimiento experimental de un vocabulario acotado.
 - Confirmación o corrección explícita de cada respuesta por el paciente.
 - Resumen de consulta basado exclusivamente en respuestas confirmadas.
-- Integración opcional de un LLM para redactar ese resumen, bajo revisión del profesional y sin inferir datos ausentes.
+- Evaluación futura de un LLM para redactar ese resumen, bajo revisión profesional y sin inferir datos ausentes; fuera de esta etapa.
 - Interfaz responsive, navegación por teclado, foco visible, contraste y estados comprensibles sin depender solo del sonido o color.
 
 ## Arquitectura tecnológica propuesta
 
-La selección es preliminar; no hay dependencias instaladas ni componentes ejecutables.
+La primera etapa utiliza React, TypeScript, Vite, React Router, Context API y CSS con variables. No utiliza backend, autenticación, WebSockets, sincronización entre dispositivos ni infraestructura cloud.
 
 | Componente | Propuesta | Responsabilidad |
 | --- | --- | --- |
-| Frontend | React y TypeScript | Vistas del profesional y paciente, videos, cámara y confirmación |
-| Backend | Python y FastAPI | Sesiones, catálogo, validación y coordinación del flujo |
-| Sincronización | API HTTP y WebSocket | Intercambio de eventos entre las dos vistas |
-| Visión computacional | Evaluar MediaPipe y un clasificador de aprendizaje automático | Reconocimiento experimental de señas del vocabulario acordado |
-| Resumen | Adaptador opcional para un proveedor de LLM por definir | Redacción con respuestas confirmadas y revisión humana |
-| Persistencia | Por definir según necesidades y privacidad | Evitar persistencia clínica por defecto durante el prototipo |
+| Interfaz | React y TypeScript | Rutas y componentes modulares |
+| Herramientas | Vite y npm | Desarrollo y build local |
+| Navegación | React Router | Cinco rutas y protección de consulta inexistente |
+| Estado | Context API y reducer | Una consulta en memoria compartida entre modos |
+| Pruebas | Vitest y React Testing Library | Navegación, catálogo y estado |
+| Reconocimiento y resumen | Pendientes | Sin cámara ni servicios LLM activos |
 
 Flujo previsto: pregunta del catálogo → video en LSP → respuesta → reconocimiento experimental → confirmación o corrección del paciente → revisión del profesional → resumen revisado.
 
-El backend deberá excluir respuestas pendientes del resumen. La captura de video, su eventual almacenamiento y el envío de información a servicios externos requieren decisiones explícitas de consentimiento, minimización y retención antes de implementarse.
+El modelo separa `provisionalAnswers` de `consultation.answers`, que solo admite respuestas confirmadas. La captura de video y cualquier servicio externo requieren decisiones de consentimiento y privacidad antes de implementarse. El estado actual no se guarda en localStorage ni en una base de datos: se pierde al recargar.
 
 ## Organización y trabajo colaborativo
 
@@ -66,7 +66,31 @@ data/
 tests/
 ```
 
-Consultar [la guía de colaboración](docs/modulos/colaboracion.md) para repartir responsabilidades y acordar contratos. Este repositorio todavía no tiene instrucciones de ejecución: no contiene una aplicación implementada.
+Consultar [la guía de colaboración](docs/modulos/colaboracion.md) y [la arquitectura de esta etapa](docs/arquitectura/base-frontend.md). `backend/` permanece reservado y sin uso. Las pruebas del frontend viven junto a su aplicación en `frontend/src/tests/`; `tests/` se conserva para futuras pruebas transversales.
+
+## Ejecutar el proyecto
+
+Requisito: Node.js 22.12 o superior y npm. Ejecutar desde la raíz del repositorio:
+
+```sh
+cd frontend
+npm ci
+npm run dev
+```
+
+Abrir la dirección que indique Vite, habitualmente `http://127.0.0.1:5173`. Para verificar y previsualizar:
+
+```sh
+npm test
+npm run build
+npm run preview
+```
+
+`npm install` permite instalar por primera vez o actualizar el lockfile tras cambios de dependencias; `npm ci` reproduce las versiones fijadas en `package-lock.json`. No se necesita `.env` ni credenciales.
+
+Rutas: `/`, `/consulta/nueva`, `/consulta/profesional`, `/consulta/paciente` y `/consulta/resumen`. Las tres últimas redirigen al inicio de consulta si no existe una consulta abierta. Un servidor futuro deberá redirigir las rutas SPA a `index.html`.
+
+Para comprobar la base: crear una consulta de demostración, buscar «tos», alternar a paciente y abrir resumen. No ingresar datos reales. Los controles de confirmar, corregir y repetir se presentan solo como una guía visual no interactiva.
 
 ## Alcance y limitaciones
 
@@ -84,7 +108,7 @@ Consultar [la guía de colaboración](docs/modulos/colaboracion.md) para reparti
 
 ## Estado actual
 
-**Preparación inicial del repositorio.** Solo están presentes documentación, estructura de carpetas y reglas de exclusión. No están implementadas las vistas, la sincronización, el reconocimiento de señas ni la integración con un LLM. No hay dependencias, pruebas ejecutables ni despliegue.
+**Base frontend funcional.** Incluye las cinco rutas, diseño responsive, catálogo tipado con módulo respiratorio, búsqueda por alias, estado compartido en memoria y pruebas iniciales. Las vistas profesional, paciente y resumen son bases de navegación; no implementan todavía el flujo clínico completo. No hay videos LSP validados, captura de respuestas, reconocimiento, LLM ni despliegue. Los pictogramas son provisionales y no garantizan comprensión para personas que utilizan exclusivamente LSP.
 
 ## Licencia
 
