@@ -1,0 +1,52 @@
+# Secretos y configuración local
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+secrets*.json
+
+# Datos y archivos locales: publicar ejemplos sintéticos solo tras revisión
+/data/*
+!/data/.gitkeep
+/uploads/
+/recordings/
+*.mp4
+*.mov
+*.webm
+*.avi
+*.sqlite
+*.sqlite3
+*.db
+*.log
+
+# JavaScript / TypeScript
+node_modules/
+dist/
+build/
+coverage/
+.next/
+.vite/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# Entorno y temporales
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+~$*
